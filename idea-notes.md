@@ -21,4 +21,3 @@ Pamiętanie jak dużo i co ile podlewać każdą z domowych roślin.
 
 ### Kryteria sukcesu
 - 75% podpowiedzi AI o podlewaniu danej rośliny jest akceptowane
-- 
