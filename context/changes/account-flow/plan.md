@@ -265,35 +265,35 @@ No test project exists yet. When added (per `AGENTS.md`), account flow tests sho
 
 #### Automated
 
-- [x] 1.1 `dotnet build` succeeds with Razor Pages registered and layout files in place
+- [x] 1.1 `dotnet build` succeeds with Razor Pages registered and layout files in place — 9cf9cad
 
 #### Manual
 
-- [x] 1.2 `dotnet run` starts without startup exceptions or Razor Pages configuration errors
+- [x] 1.2 `dotnet run` starts without startup exceptions or Razor Pages configuration errors — 9cf9cad
 
 ### Phase 2: Account Pages
 
 #### Automated
 
-- [ ] 2.1 `dotnet build` succeeds with all account pages in place
+- [x] 2.1 `dotnet build` succeeds with all account pages in place
 
 #### Manual
 
-- [ ] 2.2 Registration form renders at `/account/register`
-- [ ] 2.3 Register with valid credentials → auto-signed in, redirected to `/plants` (404 expected)
-- [ ] 2.4 Login form renders at `/account/login`
-- [ ] 2.5 Sign in with valid credentials → redirected to `/plants`
-- [ ] 2.6 Nav bar shows user email and "Sign out" button
-- [ ] 2.7 Sign out → redirected to `/account/login`
-- [ ] 2.8 Validation errors display correctly for short password and mismatched confirm
-- [ ] 2.9 Wrong password → "Invalid email or password." error shown
-- [ ] 2.10 Unauthenticated `/plants` → redirected to `/account/login?ReturnUrl=%2Fplants`
+- [x] 2.2 Registration form renders at `/account/register`
+- [x] 2.3 Register with valid credentials → auto-signed in, redirected to `/plants` (404 expected)
+- [x] 2.4 Login form renders at `/account/login`
+- [x] 2.5 Sign in with valid credentials → redirected to `/plants`
+- [x] 2.6 Nav bar shows user email and "Sign out" button
+- [x] 2.7 Sign out → redirected to `/account/login`
+- [x] 2.8 Validation errors display correctly for short password and mismatched confirm
+- [x] 2.9 Wrong password → "Invalid email or password." error shown
+- [x] 2.10 Unauthenticated `/plants` → redirected to `/account/login?ReturnUrl=%2Fplants`
 
 ### Phase 3: Plant List Page
 
 #### Automated
 
-- [ ] 3.1 `dotnet build` succeeds
+- [x] 3.1 `dotnet build` succeeds
 
 #### Manual
 
