@@ -1,7 +1,7 @@
 ---
 change_id: account-flow
 title: Account flow: sign up, sign in, sign out, and empty plant list
-status: implementing
+status: implemented
 created: 2026-08-11
 updated: 2026-08-11
 archived_at: null

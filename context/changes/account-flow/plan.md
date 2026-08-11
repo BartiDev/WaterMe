@@ -293,10 +293,10 @@ No test project exists yet. When added (per `AGENTS.md`), account flow tests sho
 
 #### Automated
 
-- [x] 3.1 `dotnet build` succeeds
+- [x] 3.1 `dotnet build` succeeds — 3f34cd6
 
 #### Manual
 
-- [x] 3.2 Full S-01 end-to-end flow: sign up → `/plants` (empty state + disabled button) → sign out → sign in → `/plants`
-- [x] 3.3 Unauthenticated `/plants` → redirected to login → after sign-in → back to `/plants`
-- [x] 3.4 `GET /healthz` returns 200 (no regression)
+- [x] 3.2 Full S-01 end-to-end flow: sign up → `/plants` (empty state + disabled button) → sign out → sign in → `/plants` — 3f34cd6
+- [x] 3.3 Unauthenticated `/plants` → redirected to login → after sign-in → back to `/plants` — 3f34cd6
+- [x] 3.4 `GET /healthz` returns 200 (no regression) — 3f34cd6
