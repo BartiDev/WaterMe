@@ -247,10 +247,10 @@ Migrations are developer-run only. There is no CI step and no auto-apply on star
 
 #### Automated
 
-- [x] 2.1 `dotnet build` succeeds after all Program.cs changes
-- [x] 2.2 `dotnet run` starts without startup exceptions
+- [x] 2.1 `dotnet build` succeeds after all Program.cs changes — 5145de9
+- [x] 2.2 `dotnet run` starts without startup exceptions — 5145de9
 
 #### Manual
 
-- [x] 2.3 `GET /healthz` returns 200 OK without credentials
-- [x] 2.4 Unauthenticated GET to any non-health-check route returns 302 to `/account/login`
+- [x] 2.3 `GET /healthz` returns 200 OK without credentials — 5145de9
+- [x] 2.4 Unauthenticated GET to any non-health-check route returns 302 to `/account/login` — 5145de9
