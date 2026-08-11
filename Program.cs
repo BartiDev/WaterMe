@@ -52,6 +52,8 @@ builder.Services.AddDataProtection()
 builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy);
 
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -67,5 +69,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/healthz").AllowAnonymous();
+app.MapRazorPages();
 
 app.Run();

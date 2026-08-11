@@ -265,11 +265,11 @@ No test project exists yet. When added (per `AGENTS.md`), account flow tests sho
 
 #### Automated
 
-- [ ] 1.1 `dotnet build` succeeds with Razor Pages registered and layout files in place
+- [x] 1.1 `dotnet build` succeeds with Razor Pages registered and layout files in place
 
 #### Manual
 
-- [ ] 1.2 `dotnet run` starts without startup exceptions or Razor Pages configuration errors
+- [x] 1.2 `dotnet run` starts without startup exceptions or Razor Pages configuration errors
 
 ### Phase 2: Account Pages
 
