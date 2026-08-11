@@ -236,21 +236,21 @@ Migrations are developer-run only. There is no CI step and no auto-apply on star
 
 #### Automated
 
-- [x] 1.1 `dotnet build` succeeds with all 5 new packages resolved and no compiler errors
+- [x] 1.1 `dotnet build` succeeds with all 5 new packages resolved and no compiler errors — 639278a
 
 #### Manual
 
-- [x] 1.2 `dotnet ef migrations add InitialCreate` completes without errors; migration files appear in `Migrations/`
-- [x] 1.3 `dotnet ef database update` applies cleanly; `waterme.db` contains Identity and DataProtectionKeys tables
+- [x] 1.2 `dotnet ef migrations add InitialCreate` completes without errors; migration files appear in `Migrations/` — 639278a
+- [x] 1.3 `dotnet ef database update` applies cleanly; `waterme.db` contains Identity and DataProtectionKeys tables — 639278a
 
 ### Phase 2: Auth Wiring
 
 #### Automated
 
-- [ ] 2.1 `dotnet build` succeeds after all Program.cs changes
-- [ ] 2.2 `dotnet run` starts without startup exceptions
+- [x] 2.1 `dotnet build` succeeds after all Program.cs changes
+- [x] 2.2 `dotnet run` starts without startup exceptions
 
 #### Manual
 
-- [ ] 2.3 `GET /healthz` returns 200 OK without credentials
-- [ ] 2.4 Unauthenticated GET to any non-health-check route returns 302 to `/account/login`
+- [x] 2.3 `GET /healthz` returns 200 OK without credentials
+- [x] 2.4 Unauthenticated GET to any non-health-check route returns 302 to `/account/login`
