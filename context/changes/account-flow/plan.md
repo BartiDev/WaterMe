@@ -275,19 +275,19 @@ No test project exists yet. When added (per `AGENTS.md`), account flow tests sho
 
 #### Automated
 
-- [x] 2.1 `dotnet build` succeeds with all account pages in place
+- [x] 2.1 `dotnet build` succeeds with all account pages in place — 9dc3fd6
 
 #### Manual
 
-- [x] 2.2 Registration form renders at `/account/register`
-- [x] 2.3 Register with valid credentials → auto-signed in, redirected to `/plants` (404 expected)
-- [x] 2.4 Login form renders at `/account/login`
-- [x] 2.5 Sign in with valid credentials → redirected to `/plants`
-- [x] 2.6 Nav bar shows user email and "Sign out" button
-- [x] 2.7 Sign out → redirected to `/account/login`
-- [x] 2.8 Validation errors display correctly for short password and mismatched confirm
-- [x] 2.9 Wrong password → "Invalid email or password." error shown
-- [x] 2.10 Unauthenticated `/plants` → redirected to `/account/login?ReturnUrl=%2Fplants`
+- [x] 2.2 Registration form renders at `/account/register` — 9dc3fd6
+- [x] 2.3 Register with valid credentials → auto-signed in, redirected to `/plants` (404 expected) — 9dc3fd6
+- [x] 2.4 Login form renders at `/account/login` — 9dc3fd6
+- [x] 2.5 Sign in with valid credentials → redirected to `/plants` — 9dc3fd6
+- [x] 2.6 Nav bar shows user email and "Sign out" button — 9dc3fd6
+- [x] 2.7 Sign out → redirected to `/account/login` — 9dc3fd6
+- [x] 2.8 Validation errors display correctly for short password and mismatched confirm — 9dc3fd6
+- [x] 2.9 Wrong password → "Invalid email or password." error shown — 9dc3fd6
+- [x] 2.10 Unauthenticated `/plants` → redirected to `/account/login?ReturnUrl=%2Fplants` — 9dc3fd6
 
 ### Phase 3: Plant List Page
 
@@ -297,6 +297,6 @@ No test project exists yet. When added (per `AGENTS.md`), account flow tests sho
 
 #### Manual
 
-- [ ] 3.2 Full S-01 end-to-end flow: sign up → `/plants` (empty state + disabled button) → sign out → sign in → `/plants`
-- [ ] 3.3 Unauthenticated `/plants` → redirected to login → after sign-in → back to `/plants`
-- [ ] 3.4 `GET /healthz` returns 200 (no regression)
+- [x] 3.2 Full S-01 end-to-end flow: sign up → `/plants` (empty state + disabled button) → sign out → sign in → `/plants`
+- [x] 3.3 Unauthenticated `/plants` → redirected to login → after sign-in → back to `/plants`
+- [x] 3.4 `GET /healthz` returns 200 (no regression)

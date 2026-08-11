@@ -69,6 +69,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/healthz").AllowAnonymous();
+app.MapGet("/", () => Results.Redirect("/plants")).AllowAnonymous();
 app.MapRazorPages();
 
 app.Run();
