@@ -39,6 +39,11 @@ coverage/
 *.log
 logs/
 
+# SQLite local database (never commit)
+*.db
+*.db-shm
+*.db-wal
+
 # Temporary files
 tmp/
 temp/
