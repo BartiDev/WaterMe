@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using water_me;
+using water_me.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,7 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy);
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<IWateringScheduleService, OpenAiWateringScheduleService>();
 
 var app = builder.Build();
 
