@@ -415,12 +415,12 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 #### Automated
 
-- [ ] 1.1 `dotnet build` succeeds with Plant model and updated DbContext
-- [ ] 1.2 `dotnet ef database update` applies migration without errors
+- [x] 1.1 `dotnet build` succeeds with Plant model and updated DbContext
+- [x] 1.2 `dotnet ef database update` applies migration without errors
 
 #### Manual
 
-- [ ] 1.3 `Plants` table exists in `waterme.db`
+- [x] 1.3 `Plants` table exists in `waterme.db`
 
 ### Phase 2: OpenAI Watering Schedule Service
 
