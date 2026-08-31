@@ -419,12 +419,12 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 #### Automated
 
-- [x] 2.1 `dotnet build` succeeds with renamed service class and updated DI registration
+- [x] 2.1 `dotnet build` succeeds with renamed service class and updated DI registration — 2577b7a
 
 #### Manual
 
-- [x] 2.2 `dotnet run` starts without configuration errors (`OpenRouter:ApiKey` user-secret set)
-- [x] 2.3 AI service returns a valid suggestion for a real species name within 15 seconds via OpenRouter
+- [x] 2.2 `dotnet run` starts without configuration errors (`OpenRouter:ApiKey` user-secret set) — 2577b7a
+- [x] 2.3 AI service returns a valid suggestion for a real species name within 15 seconds via OpenRouter — 2577b7a
 
 ### Phase 3: Add Plant Page + Inline AI Suggestion
 
@@ -434,10 +434,10 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 #### Manual
 
-- [ ] 3.2 Species name input → AI suggestion appears inline within 5 seconds
-- [ ] 3.3 Edit and save → plant created; redirect to `/plants`
-- [ ] 3.4 AI failure → inline error + empty fields for manual entry; save succeeds
-- [ ] 3.5 Empty species name or out-of-range frequency → server-side validation error shown
+- [x] 3.2 Species name input → AI suggestion appears inline within 5 seconds
+- [x] 3.3 Edit and save → plant created; redirect to `/plants`
+- [x] 3.4 AI failure → inline error + empty fields for manual entry; save succeeds
+- [x] 3.5 Empty species name or out-of-range frequency → server-side validation error shown
 
 ### Phase 4: Plant List + Mark as Watered
 
