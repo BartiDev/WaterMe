@@ -2,7 +2,7 @@
 
 ## Overview
 
-Deliver S-02: the full 6-step MVP flow on top of the completed S-01 account foundation. A signed-in user can add a plant by species name, receive an AI-suggested watering schedule (frequency + amount) inline on the same page, edit and save it, see all their plants in a list with live countdown status, mark a plant as watered, and undo that action within 10 seconds. OpenAI provides the schedule suggestions via a structured JSON prompt.
+Deliver S-02: the full 6-step MVP flow on top of the completed S-01 account foundation. A signed-in user can add a plant by species name, receive an AI-suggested watering schedule (frequency + amount) inline on the same page, edit and save it, see all their plants in a list with live countdown status, mark a plant as watered, and undo that action within 10 seconds. OpenRouter provides the schedule suggestions via its OpenAI-compatible API using the `openai/gpt-4o-mini` model.
 
 ## Current State Analysis
 
@@ -54,7 +54,7 @@ Five phases in dependency order. Phases 1 and 2 build the foundations (data mode
 
 **PreviousLastWateredAt enables single-level undo without a history table.** On "Water it": copy `LastWateredAt` → `PreviousLastWateredAt`, set `LastWateredAt = UtcNow`. On "Unwater": restore `LastWateredAt = PreviousLastWateredAt`, clear `PreviousLastWateredAt`. This pattern breaks if the user waters twice in quick succession — acceptable for MVP since the 10-second window prevents that in practice.
 
-**OpenAI API key must never appear in source files.** In development: `dotnet user-secrets set "OpenAI:ApiKey" "sk-..."`. In production: Azure App Service Application Setting `OpenAI__ApiKey`. The `ModelId` (`gpt-56-terra`) lives in `appsettings.json` (non-secret).
+**OpenRouter API key must never appear in source files.** In development: `dotnet user-secrets set "OpenRouter:ApiKey" "sk-or-..."`. In production: Azure App Service Application Setting `OpenRouter__ApiKey`. The `ModelId` (`openai/gpt-4o-mini`) lives in `appsettings.json` (non-secret). OpenRouter base URL is `https://openrouter.ai/api/v1` — set via `OpenAIClientOptions.Endpoint`, not in config, since it is not environment-specific.
 
 **5-second AI timeout.** Wrap the OpenAI SDK call with a `CancellationTokenSource(TimeSpan.FromSeconds(5))`. On `OperationCanceledException` or any exception, return a failure result — never let an AI timeout surface as an unhandled 500.
 
@@ -116,77 +116,70 @@ Define the `Plant` entity, wire it into `ApplicationDbContext`, and generate + a
 
 ---
 
-## Phase 2: OpenAI Watering Schedule Service
+## Phase 2: OpenRouter Watering Schedule Service
 
 ### Overview
 
-Install the OpenAI NuGet package, define the service interface and implementation (JSON prompt, 5-second timeout, graceful failure), configure appsettings, and register in DI. Phase 2 is complete when the service is injectable and can return a valid suggestion for a real species name.
+Switch the AI provider from OpenAI to OpenRouter by pointing the existing OpenAI SDK at OpenRouter's compatible endpoint, renaming config keys, updating the service class, and refreshing the DI registration. The `OpenAI` NuGet package stays — no package swap needed. Phase 2 is complete when the service is injectable and returns a valid suggestion for a real species name via OpenRouter.
 
 ### Changes Required
 
-#### 1. NuGet package
-
-**Command**: `dotnet add package OpenAI`
-
-**Intent**: Add the official OpenAI .NET SDK so the service can call the Chat Completions API.
-
-#### 2. appsettings.json — OpenAI config section
+#### 1. appsettings.json — rename config section
 
 **File**: `appsettings.json`
 
-**Intent**: Store the non-secret OpenAI configuration (model ID) under a dedicated `OpenAI` key so it can be overridden per environment. The API key is a secret and must not appear in any appsettings file.
+**Intent**: Rename the `"OpenAI"` config section to `"OpenRouter"` and update the model ID to OpenRouter's namespaced format. The API key remains a secret and must not appear in any appsettings file.
 
-**Contract**: Add an `OpenAI` object with one key: `"ModelId": "gpt-56-terra"`. No `ApiKey` field in any appsettings file — set via `dotnet user-secrets` in dev and Azure App Service Application Setting in production.
+**Contract**: Replace the `"OpenAI"` object with `"OpenRouter": { "ModelId": "openai/gpt-4o-mini" }`. Note the provider-prefixed model ID — OpenRouter requires `openai/gpt-4o-mini`, not the bare `gpt-4o-mini` accepted by the direct OpenAI API. No `ApiKey` field in any appsettings file.
 
-#### 3. Service interface
+#### 2. Rename and update service implementation
 
-**File**: `Services/IWateringScheduleService.cs` (new file; create `Services/` folder)
+**File**: `Services/OpenRouterWateringScheduleService.cs` (rename from `OpenAiWateringScheduleService.cs`)
 
-**Intent**: Define the contract that the Add Plant page model depends on, so the real implementation can be swapped for a test double later.
+**Intent**: Redirect the existing OpenAI SDK to OpenRouter's base URL, read config from the renamed `OpenRouter:*` keys, and inject the two optional OpenRouter HTTP headers (`HTTP-Referer`, `X-Title`) via a pipeline policy. All failure modes (timeout, network error, parse error, invalid values) continue to return `Success = false`.
 
-**Contract**: Interface `IWateringScheduleService` in namespace `water_me.Services` with one method:
+**Contract**: Rename class to `OpenRouterWateringScheduleService : IWateringScheduleService`. Constructor reads `OpenRouter:ApiKey` and `OpenRouter:ModelId` from `IConfiguration`.
+
+Client instantiation replaces the bare `new OpenAIClient(_apiKey)` call:
+
 ```csharp
-Task<WateringScheduleResult> GetScheduleAsync(string speciesName, CancellationToken ct = default);
+var options = new OpenAIClientOptions { Endpoint = new Uri("https://openrouter.ai/api/v1") };
+options.AddPolicy(new OpenRouterHeadersPolicy(), PipelinePosition.PerCall);
+var client = new OpenAIClient(new ApiKeyCredential(_apiKey), options);
 ```
-Where `WateringScheduleResult` is a record in the same file:
-```csharp
-record WateringScheduleResult(bool Success, int FrequencyDays, string Amount);
-```
-On failure, `Success = false` and the numeric/string fields carry zero/empty values.
 
-#### 4. Service implementation
+Where `OpenRouterHeadersPolicy` is a private nested class inheriting `PipelinePolicy` (from `System.ClientModel.Primitives`) that sets `HTTP-Referer: https://waterme.app` and `X-Title: WaterMe` on each request before calling `ProcessNext` / `ProcessNextAsync`.
 
-**File**: `Services/OpenAiWateringScheduleService.cs`
+Everything else — the system prompt, user message, timeout, JSON parsing, validation, and error logging — stays identical to the existing implementation.
 
-**Intent**: Call the OpenAI Chat Completions API with a structured JSON prompt, enforce a 5-second timeout, parse the response, and return a `WateringScheduleResult`. All failures (timeout, network error, parse error, invalid values) return `Success = false` — never throw to the caller.
-
-**Contract**: Class `OpenAiWateringScheduleService : IWateringScheduleService`. Constructor injects `IConfiguration` to read `OpenAI:ApiKey` and `OpenAI:ModelId`. 
-
-System prompt: `"You are a plant care expert. Respond ONLY with a JSON object in this exact format: {\"FrequencyDays\": <int>, \"Amount\": \"<string>\"}. FrequencyDays is the number of days between waterings. Amount is a concise English description of how much water to give (e.g. '200ml' or 'water until it drains from the pot'). Do not include any other text."`
-
-User message: the raw species name string.
-
-Call with a `CancellationTokenSource(TimeSpan.FromSeconds(5))` linked to the passed-in `ct`. Parse the response content as JSON; validate that `FrequencyDays > 0` and `Amount` is non-empty. On any exception or validation failure: log at Warning level and return `new WateringScheduleResult(false, 0, "")`.
-
-#### 5. DI registration
+#### 3. DI registration
 
 **File**: `Program.cs`
 
-**Intent**: Register the service and expose the result record as a known type to the DI container.
+**Intent**: Update the registered concrete type to match the renamed class.
 
-**Contract**: After `builder.Services.AddRazorPages()`, add `builder.Services.AddScoped<IWateringScheduleService, OpenAiWateringScheduleService>()`. The OpenAI SDK manages its own `HttpClient` internally — no `AddHttpClient<T>()` call is needed or correct here.
+**Contract**: Change `AddScoped<IWateringScheduleService, OpenAiWateringScheduleService>()` to `AddScoped<IWateringScheduleService, OpenRouterWateringScheduleService>()`.
+
+#### 4. Developer secrets
+
+**Command** (run once locally):
+
+```
+dotnet user-secrets set "OpenRouter:ApiKey" "sk-or-..."
+```
+
+**Intent**: Replace the old `OpenAI:ApiKey` secret with `OpenRouter:ApiKey` so the app starts cleanly in development.
 
 ### Success Criteria
 
 #### Automated Verification
 
-- `dotnet build` succeeds with the OpenAI package and service files in place
+- `dotnet build` succeeds with renamed service class and updated DI registration
 
 #### Manual Verification
 
-- `dotnet user-secrets set "OpenAI:ApiKey" "sk-..."` configured for the project
-- `dotnet run` starts without configuration errors
-- Manual smoke test: temporarily call the service from a test endpoint or Razor Page handler, pass `"Monstera deliciosa"`, verify a valid JSON suggestion is returned within 5 seconds
+- `dotnet run` starts without configuration errors (`OpenRouter:ApiKey` user-secret set)
+- Manual smoke test: pass `"Monstera deliciosa"` to the service (via the Add Plant page or a temporary handler), verify a valid JSON suggestion is returned within 15 seconds via OpenRouter
 
 **Pause here for manual confirmation before proceeding to Phase 3.**
 
@@ -341,8 +334,8 @@ Apply the EF Core migration to the Azure SQL production database, configure the 
 **Intent**: Supply the two OpenAI secrets to the production app without checking them into source control.
 
 **Contract**: In Azure App Service → Configuration → Application Settings, add:
-- `OpenAI__ApiKey` = `<production OpenAI API key>` (double-underscore maps to nested config)
-- `OpenAI__ModelId` = `gpt-56-terra` (or override the appsettings.json default if needed)
+- `OpenRouter__ApiKey` = `<OpenRouter API key>` (double-underscore maps to nested config)
+- `OpenRouter__ModelId` = `openai/gpt-4o-mini` (or override the appsettings.json default if needed)
 
 #### 2. EF Core migration on Azure SQL
 
@@ -422,22 +415,22 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 - [x] 1.3 `Plants` table exists in `waterme.db` — 04e286c
 
-### Phase 2: OpenAI Watering Schedule Service
+### Phase 2: OpenRouter Watering Schedule Service
 
 #### Automated
 
-- [x] 2.1 `dotnet build` succeeds with OpenAI package and service files
+- [x] 2.1 `dotnet build` succeeds with renamed service class and updated DI registration
 
 #### Manual
 
-- [ ] 2.2 `dotnet run` starts without configuration errors (user-secrets set)
-- [ ] 2.3 AI service returns a valid suggestion for a real species name within 5 seconds
+- [x] 2.2 `dotnet run` starts without configuration errors (`OpenRouter:ApiKey` user-secret set)
+- [x] 2.3 AI service returns a valid suggestion for a real species name within 15 seconds via OpenRouter
 
 ### Phase 3: Add Plant Page + Inline AI Suggestion
 
 #### Automated
 
-- [ ] 3.1 `dotnet build` succeeds with Add Plant page
+- [x] 3.1 `dotnet build` succeeds with Add Plant page
 
 #### Manual
 

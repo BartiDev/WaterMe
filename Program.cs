@@ -54,7 +54,7 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy);
 
 builder.Services.AddRazorPages();
-builder.Services.AddScoped<IWateringScheduleService, OpenAiWateringScheduleService>();
+builder.Services.AddScoped<IWateringScheduleService, OpenRouterWateringScheduleService>();
 
 var app = builder.Build();
 

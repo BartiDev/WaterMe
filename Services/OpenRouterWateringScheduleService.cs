@@ -1,3 +1,5 @@
+using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using OpenAI;
@@ -5,11 +7,11 @@ using OpenAI.Chat;
 
 namespace water_me.Services;
 
-public class OpenAiWateringScheduleService : IWateringScheduleService
+public class OpenRouterWateringScheduleService : IWateringScheduleService
 {
     private readonly string _apiKey;
     private readonly string _modelId;
-    private readonly ILogger<OpenAiWateringScheduleService> _logger;
+    private readonly ILogger<OpenRouterWateringScheduleService> _logger;
 
     private const string SystemPrompt =
         "You are a plant care expert. Respond ONLY with a JSON object in this exact format: " +
@@ -18,11 +20,11 @@ public class OpenAiWateringScheduleService : IWateringScheduleService
         "Amount is a concise English description of how much water to give (e.g. '200ml' or 'water until it drains from the pot'). " +
         "Do not include any other text.";
 
-    public OpenAiWateringScheduleService(IConfiguration configuration, ILogger<OpenAiWateringScheduleService> logger)
+    public OpenRouterWateringScheduleService(IConfiguration configuration, ILogger<OpenRouterWateringScheduleService> logger)
     {
-        _apiKey = configuration["OpenAI:ApiKey"]
-            ?? throw new InvalidOperationException("OpenAI:ApiKey is not configured.");
-        _modelId = configuration["OpenAI:ModelId"] ?? "gpt-4o-mini";
+        _apiKey = configuration["OpenRouter:ApiKey"]
+            ?? throw new InvalidOperationException("OpenRouter:ApiKey is not configured.");
+        _modelId = configuration["OpenRouter:ModelId"] ?? "openai/gpt-4o-mini";
         _logger = logger;
     }
 
@@ -31,9 +33,11 @@ public class OpenAiWateringScheduleService : IWateringScheduleService
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(5));
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
 
-            var client = new OpenAIClient(_apiKey);
+            var options = new OpenAIClientOptions { Endpoint = new Uri("https://openrouter.ai/api/v1") };
+            options.AddPolicy(new OpenRouterHeadersPolicy(), PipelinePosition.PerCall);
+            var client = new OpenAIClient(new ApiKeyCredential(_apiKey), options);
             var chat = client.GetChatClient(_modelId);
 
             var messages = new List<ChatMessage>
@@ -53,7 +57,7 @@ public class OpenAiWateringScheduleService : IWateringScheduleService
 
             if (frequencyDays <= 0 || string.IsNullOrEmpty(amount))
             {
-                _logger.LogWarning("OpenAI returned invalid schedule values for {Species}", speciesName);
+                _logger.LogWarning("OpenRouter returned invalid schedule values for {Species}", speciesName);
                 return new WateringScheduleResult(false, 0, "");
             }
 
@@ -61,8 +65,25 @@ public class OpenAiWateringScheduleService : IWateringScheduleService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get watering schedule from OpenAI for {Species}", speciesName);
+            _logger.LogWarning(ex, "Failed to get watering schedule from OpenRouter for {Species}", speciesName);
             return new WateringScheduleResult(false, 0, "");
+        }
+    }
+
+    private sealed class OpenRouterHeadersPolicy : PipelinePolicy
+    {
+        public override void Process(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+        {
+            message.Request.Headers.Set("HTTP-Referer", "https://waterme.app");
+            message.Request.Headers.Set("X-Title", "WaterMe");
+            ProcessNext(message, pipeline, currentIndex);
+        }
+
+        public override async ValueTask ProcessAsync(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+        {
+            message.Request.Headers.Set("HTTP-Referer", "https://waterme.app");
+            message.Request.Headers.Set("X-Title", "WaterMe");
+            await ProcessNextAsync(message, pipeline, currentIndex);
         }
     }
 }
