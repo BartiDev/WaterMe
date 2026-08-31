@@ -3,7 +3,7 @@ project: "Water Me"
 version: 1
 status: draft
 created: 2026-07-22
-updated: 2026-07-22
+updated: 2026-08-31
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -27,7 +27,7 @@ A casual houseplant collector with 5–20 plants has no reliable way to remember
 
 | ID   | Change ID                 | Outcome (user can …)                                                                                                          | Prerequisites | PRD refs                                    | Status   |
 | ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | -------- |
-| F-01 | persistence-auth-scaffold | (foundation) EF Core + Identity wired; DB migration runs; auth middleware active                                              | —             | NFR (data integrity, isolation), FR-001, FR-002, Access Control | ready    |
+| F-01 | persistence-auth-scaffold | (foundation) EF Core + Identity wired; DB migration runs; auth middleware active                                              | —             | NFR (data integrity, isolation), FR-001, FR-002, Access Control | done     |
 | S-01 | account-flow              | sign up, sign in, sign out, and reach their empty plant list                                                                  | F-01          | FR-001, FR-002                              | proposed |
 | S-02 | core-loop                 | add a plant by species name, get an AI watering schedule, save it, see it in their list with status, and mark it as watered  | S-01          | FR-003, FR-004, FR-007, FR-008, FR-009, US-01 | proposed |
 | S-03 | plant-management          | edit a plant's watering info and delete a plant from their list                                                               | S-02          | FR-005, FR-006                              | proposed |
@@ -57,7 +57,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Merges EF Core and Identity in one step because ASP.NET Core Identity requires a DbContext — splitting them produces a non-functional intermediate state. If the Azure SQL connection string is not available at dev time, SQLite lets the Foundation land without blocking S-01.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -120,4 +120,4 @@ No open questions — all resolved.
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends an entry here — and flips that item's `Status` to `done` — when a change whose `Change ID` matches the item is archived.)
+- **F-01: (foundation) EF Core + Identity wired; DB migration runs; auth middleware active** — Archived 2026-08-31 → `context/archive/2026-08-10-persistence-auth-scaffold/`. Lesson: —.
