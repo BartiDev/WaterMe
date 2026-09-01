@@ -9,9 +9,8 @@ namespace water_me.Services;
 
 public class OpenRouterWateringScheduleService : IWateringScheduleService
 {
-    private readonly string _apiKey;
-    private readonly string _modelId;
     private readonly ILogger<OpenRouterWateringScheduleService> _logger;
+    private readonly ChatClient _chat;
 
     private const string SystemPrompt =
         "You are a plant care expert. Respond ONLY with a JSON object in this exact format: " +
@@ -22,10 +21,15 @@ public class OpenRouterWateringScheduleService : IWateringScheduleService
 
     public OpenRouterWateringScheduleService(IConfiguration configuration, ILogger<OpenRouterWateringScheduleService> logger)
     {
-        _apiKey = configuration["OpenRouter:ApiKey"]
+        var apiKey = configuration["OpenRouter:ApiKey"]
             ?? throw new InvalidOperationException("OpenRouter:ApiKey is not configured.");
-        _modelId = configuration["OpenRouter:ModelId"] ?? "openai/gpt-4o-mini";
+        var modelId = configuration["OpenRouter:ModelId"] ?? "openai/gpt-4o-mini";
         _logger = logger;
+
+        var options = new OpenAIClientOptions { Endpoint = new Uri("https://openrouter.ai/api/v1") };
+        options.AddPolicy(new OpenRouterHeadersPolicy(), PipelinePosition.PerCall);
+        var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
+        _chat = client.GetChatClient(modelId);
     }
 
     public async Task<WateringScheduleResult> GetScheduleAsync(string speciesName, CancellationToken ct = default)
@@ -33,12 +37,7 @@ public class OpenRouterWateringScheduleService : IWateringScheduleService
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(TimeSpan.FromSeconds(15));
-
-            var options = new OpenAIClientOptions { Endpoint = new Uri("https://openrouter.ai/api/v1") };
-            options.AddPolicy(new OpenRouterHeadersPolicy(), PipelinePosition.PerCall);
-            var client = new OpenAIClient(new ApiKeyCredential(_apiKey), options);
-            var chat = client.GetChatClient(_modelId);
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
 
             var messages = new List<ChatMessage>
             {
@@ -46,7 +45,7 @@ public class OpenRouterWateringScheduleService : IWateringScheduleService
                 new UserChatMessage(speciesName)
             };
 
-            var response = await chat.CompleteChatAsync(messages, cancellationToken: cts.Token);
+            var response = await _chat.CompleteChatAsync(messages, cancellationToken: cts.Token);
             var content = response.Value.Content[0].Text;
 
             using var doc = JsonDocument.Parse(content);

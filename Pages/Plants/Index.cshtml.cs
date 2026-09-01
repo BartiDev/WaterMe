@@ -21,10 +21,11 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var userId = _userManager.GetUserId(User)!;
+        var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim.");
         Plants = await _db.Plants
             .Where(p => p.UserId == userId)
             .OrderBy(p => p.CreatedAt)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -41,10 +42,10 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostWaterAsync(int id)
     {
-        var userId = _userManager.GetUserId(User)!;
-        var plant = await _db.Plants.FindAsync(id);
-        if (plant == null || plant.UserId != userId)
-            return Forbid();
+        var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim.");
+        var plant = await _db.Plants
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        if (plant == null) return NotFound();
 
         plant.PreviousLastWateredAt = plant.LastWateredAt;
         plant.LastWateredAt = DateTime.UtcNow;
@@ -55,10 +56,10 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostUnwaterAsync(int id)
     {
-        var userId = _userManager.GetUserId(User)!;
-        var plant = await _db.Plants.FindAsync(id);
-        if (plant == null || plant.UserId != userId)
-            return Forbid();
+        var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim.");
+        var plant = await _db.Plants
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        if (plant == null) return NotFound();
 
         plant.LastWateredAt = plant.PreviousLastWateredAt;
         plant.PreviousLastWateredAt = null;

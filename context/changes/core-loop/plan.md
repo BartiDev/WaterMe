@@ -299,6 +299,12 @@ JS at the bottom of the page:
 
 A single `<form>` with an anti-forgery hidden input is needed anywhere on the page so the JS can read the token value.
 
+#### 3. Shared layout (addendum — discovered during implementation)
+
+**File**: `Pages/Shared/_Layout.cshtml`
+
+**Intent**: The plant pages require a consistent shell to render correctly. Bootstrap CDN, a navbar with the brand link, authenticated-user display, and sign-in/register nav links were added here. Not listed in the original plan but implicitly required for the plant pages to be usable.
+
 ### Success Criteria
 
 #### Automated Verification
@@ -443,17 +449,17 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 #### Automated
 
-- [x] 4.1 `dotnet build` succeeds with updated Index page
+- [x] 4.1 `dotnet build` succeeds with updated Index page — bb9bf7c
 
 #### Manual
 
-- [x] 4.2 Plant list shows correct plants with status badges
-- [x] 4.3 "Water today" badge for never-watered plant
-- [x] 4.4 "Water it" click → countdown + status update
-- [x] 4.5 "Undo" within 10 seconds → status reverts
-- [x] 4.6 Countdown expiry → "Water it" re-enabled
-- [x] 4.7 Cross-user isolation: different account sees no plants
-- [x] 4.8 `GET /healthz` returns 200
+- [x] 4.2 Plant list shows correct plants with status badges — bb9bf7c
+- [x] 4.3 "Water today" badge for never-watered plant — bb9bf7c
+- [x] 4.4 "Water it" click → countdown + status update — bb9bf7c
+- [x] 4.5 "Undo" within 10 seconds → status reverts — bb9bf7c
+- [x] 4.6 Countdown expiry → "Water it" re-enabled — bb9bf7c
+- [x] 4.7 Cross-user isolation: different account sees no plants — bb9bf7c
+- [x] 4.8 `GET /healthz` returns 200 — bb9bf7c
 
 ### Phase 5: Production Deployment
 

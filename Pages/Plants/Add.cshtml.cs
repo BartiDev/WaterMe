@@ -44,7 +44,7 @@ public class AddModel : PageModel
         ModelState.ContainsKey("Input.WateringFrequencyDays") ||
         ModelState.ContainsKey("Input.WateringAmount");
 
-    public IActionResult OnGet() => Page();
+    public Task<IActionResult> OnGetAsync() => Task.FromResult<IActionResult>(Page());
 
     public async Task<IActionResult> OnPostSuggestAsync()
     {
@@ -62,7 +62,7 @@ public class AddModel : PageModel
 
         var plant = new Plant
         {
-            UserId = _userManager.GetUserId(User)!,
+            UserId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim."),
             SpeciesName = Input.SpeciesName,
             Nickname = Input.Nickname,
             WateringFrequencyDays = Input.WateringFrequencyDays,

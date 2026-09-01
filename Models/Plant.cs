@@ -15,6 +15,7 @@ public class Plant
     [StringLength(200)]
     public string? Nickname { get; set; }
 
+    [Range(1, 365)]
     public int WateringFrequencyDays { get; set; }
 
     [Required, StringLength(200)]

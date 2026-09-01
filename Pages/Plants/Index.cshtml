@@ -50,7 +50,11 @@ else
 @section Scripts {
 <script>
 (function () {
-    const token = () => document.querySelector('#csrf-form input[name="__RequestVerificationToken"]').value;
+    const token = () => {
+        const el = document.querySelector('#csrf-form input[name="__RequestVerificationToken"]');
+        if (!el) { console.error('CSRF token element missing'); return ''; }
+        return el.value;
+    };
     const countdowns = {};
 
     document.addEventListener('click', async function (e) {
