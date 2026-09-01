@@ -6,7 +6,147 @@
 
 <h2>My Plants</h2>
 
-<div class="text-center mt-5">
-    <p class="text-muted">You have no plants yet</p>
+<div class="mb-3">
     <a href="/plants/add" class="btn btn-primary">Add plant</a>
 </div>
+
+@if (Model.Plants.Count == 0)
+{
+    <div class="text-center mt-5">
+        <p class="text-muted">You have no plants yet</p>
+    </div>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var plant in Model.Plants)
+        {
+            var status = Model.GetStatus(plant);
+            var badgeClass = status.StartsWith("Overdue") ? "bg-danger"
+                           : status == "Water today" ? "bg-warning text-dark"
+                           : "bg-success";
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>@(plant.Nickname ?? plant.SpeciesName)</strong>
+                    @if (plant.Nickname != null)
+                    {
+                        <small class="text-muted ms-1">(@plant.SpeciesName)</small>
+                    }
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge @badgeClass status-badge" id="status-@plant.Id">@status</span>
+                    <button class="btn btn-sm btn-outline-primary btn-water"
+                            data-plant-id="@plant.Id">Water it</button>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+<form id="csrf-form" style="display:none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+<script>
+(function () {
+    const token = () => document.querySelector('#csrf-form input[name="__RequestVerificationToken"]').value;
+    const countdowns = {};
+
+    document.addEventListener('click', async function (e) {
+        const waterBtn = e.target.closest('.btn-water');
+        const unwaterBtn = e.target.closest('.btn-unwater');
+
+        if (waterBtn) {
+            const id = waterBtn.dataset.plantId;
+            waterBtn.disabled = true;
+            try {
+                const res = await fetch('?handler=Water', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token()
+                    },
+                    body: `id=${id}`
+                });
+                if (!res.ok) { console.error('Water failed', res.status); waterBtn.disabled = false; return; }
+                const data = await res.json();
+                updateBadge(id, data.status);
+                startCountdown(waterBtn, id);
+            } catch (err) {
+                console.error('Water error', err);
+                waterBtn.disabled = false;
+            }
+
+        } else if (unwaterBtn) {
+            const id = unwaterBtn.dataset.plantId;
+            clearCountdown(id);
+            unwaterBtn.disabled = true;
+            try {
+                const res = await fetch('?handler=Unwater', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token()
+                    },
+                    body: `id=${id}`
+                });
+                if (!res.ok) { console.error('Unwater failed', res.status); revertToWater(unwaterBtn, id); return; }
+                const data = await res.json();
+                updateBadge(id, data.status);
+                revertToWater(unwaterBtn, id);
+            } catch (err) {
+                console.error('Unwater error', err);
+                revertToWater(unwaterBtn, id);
+            }
+        }
+    });
+
+    function startCountdown(btn, id) {
+        let secs = 10;
+        btn.textContent = `Undo (${secs}s)`;
+        btn.classList.remove('btn-water', 'btn-outline-primary');
+        btn.classList.add('btn-unwater', 'btn-outline-secondary');
+        btn.dataset.plantId = id;
+        btn.disabled = false;
+
+        const interval = setInterval(() => {
+            secs--;
+            if (secs <= 0) {
+                clearCountdown(id);
+                revertToWater(btn, id);
+            } else {
+                btn.textContent = `Undo (${secs}s)`;
+            }
+        }, 1000);
+        countdowns[id] = { interval, btn };
+    }
+
+    function clearCountdown(id) {
+        if (countdowns[id]) {
+            clearInterval(countdowns[id].interval);
+            delete countdowns[id];
+        }
+    }
+
+    function revertToWater(btn, id) {
+        btn.textContent = 'Water it';
+        btn.classList.remove('btn-unwater', 'btn-outline-secondary');
+        btn.classList.add('btn-water', 'btn-outline-primary');
+        btn.dataset.plantId = id;
+        btn.disabled = false;
+    }
+
+    function updateBadge(id, status) {
+        const badge = document.getElementById(`status-${id}`);
+        if (!badge) return;
+        badge.textContent = status;
+        badge.className = 'badge status-badge ' + (
+            status.startsWith('Overdue') ? 'bg-danger' :
+            status === 'Water today' ? 'bg-warning text-dark' :
+            'bg-success'
+        );
+    }
+})();
+</script>
+}

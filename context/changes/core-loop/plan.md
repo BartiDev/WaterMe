@@ -430,30 +430,30 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 
 #### Automated
 
-- [x] 3.1 `dotnet build` succeeds with Add Plant page
+- [x] 3.1 `dotnet build` succeeds with Add Plant page — 39c76cc
 
 #### Manual
 
-- [x] 3.2 Species name input → AI suggestion appears inline within 5 seconds
-- [x] 3.3 Edit and save → plant created; redirect to `/plants`
-- [x] 3.4 AI failure → inline error + empty fields for manual entry; save succeeds
-- [x] 3.5 Empty species name or out-of-range frequency → server-side validation error shown
+- [x] 3.2 Species name input → AI suggestion appears inline within 5 seconds — 39c76cc
+- [x] 3.3 Edit and save → plant created; redirect to `/plants` — 39c76cc
+- [x] 3.4 AI failure → inline error + empty fields for manual entry; save succeeds — 39c76cc
+- [x] 3.5 Empty species name or out-of-range frequency → server-side validation error shown — 39c76cc
 
 ### Phase 4: Plant List + Mark as Watered
 
 #### Automated
 
-- [ ] 4.1 `dotnet build` succeeds with updated Index page
+- [x] 4.1 `dotnet build` succeeds with updated Index page
 
 #### Manual
 
-- [ ] 4.2 Plant list shows correct plants with status badges
-- [ ] 4.3 "Water today" badge for never-watered plant
-- [ ] 4.4 "Water it" click → countdown + status update
-- [ ] 4.5 "Undo" within 10 seconds → status reverts
-- [ ] 4.6 Countdown expiry → "Water it" re-enabled
-- [ ] 4.7 Cross-user isolation: different account sees no plants
-- [ ] 4.8 `GET /healthz` returns 200
+- [x] 4.2 Plant list shows correct plants with status badges
+- [x] 4.3 "Water today" badge for never-watered plant
+- [x] 4.4 "Water it" click → countdown + status update
+- [x] 4.5 "Undo" within 10 seconds → status reverts
+- [x] 4.6 Countdown expiry → "Water it" re-enabled
+- [x] 4.7 Cross-user isolation: different account sees no plants
+- [x] 4.8 `GET /healthz` returns 200
 
 ### Phase 5: Production Deployment
 
