@@ -113,15 +113,21 @@ else
                         if (row) row.remove();
                     } else {
                         console.error('Delete failed', res.status);
-                        deleteBtn.textContent = 'Delete';
-                        deleteBtn.removeAttribute('data-confirming');
-                        deleteBtn.removeAttribute('data-timeout-id');
+                        deleteBtn.textContent = 'Delete failed';
+                        setTimeout(() => {
+                            deleteBtn.textContent = 'Delete';
+                            deleteBtn.removeAttribute('data-confirming');
+                            deleteBtn.removeAttribute('data-timeout-id');
+                        }, 2000);
                     }
                 } catch (err) {
                     console.error('Delete error', err);
-                    deleteBtn.textContent = 'Delete';
-                    deleteBtn.removeAttribute('data-confirming');
-                    deleteBtn.removeAttribute('data-timeout-id');
+                    deleteBtn.textContent = 'Delete failed';
+                    setTimeout(() => {
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.removeAttribute('data-confirming');
+                        deleteBtn.removeAttribute('data-timeout-id');
+                    }, 2000);
                 }
             }
 

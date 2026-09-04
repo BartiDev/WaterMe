@@ -55,6 +55,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IWateringScheduleService, OpenRouterWateringScheduleService>();
+builder.Services.AddScoped<IPlantService, PlantService>();
 
 var app = builder.Build();
 

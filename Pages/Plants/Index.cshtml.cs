@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using water_me.Models;
+using water_me.Services;
 
 namespace water_me.Pages.Plants;
 
@@ -10,11 +11,13 @@ public class IndexModel : PageModel
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IPlantService _plantService;
 
-    public IndexModel(ApplicationDbContext db, UserManager<IdentityUser> userManager)
+    public IndexModel(ApplicationDbContext db, UserManager<IdentityUser> userManager, IPlantService plantService)
     {
         _db = db;
         _userManager = userManager;
+        _plantService = plantService;
     }
 
     public IList<Plant> Plants { get; private set; } = [];
@@ -71,13 +74,8 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
         var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim.");
-        var plant = await _db.Plants
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
-        if (plant == null) return NotFound();
-
-        _db.Plants.Remove(plant);
-        await _db.SaveChangesAsync();
-
+        var deleted = await _plantService.DeleteAsync(id, userId);
+        if (!deleted) return NotFound();
         return RedirectToPage("/Plants/Index");
     }
 }
