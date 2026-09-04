@@ -30,7 +30,7 @@ A casual houseplant collector with 5–20 plants has no reliable way to remember
 | F-01 | persistence-auth-scaffold | (foundation) EF Core + Identity wired; DB migration runs; auth middleware active                                              | —             | NFR (data integrity, isolation), FR-001, FR-002, Access Control | done     |
 | S-01 | account-flow              | sign up, sign in, sign out, and reach their empty plant list                                                                  | F-01          | FR-001, FR-002                              | done     |
 | S-02 | core-loop                 | add a plant by species name, get an AI watering schedule, save it, see it in their list with status, and mark it as watered  | S-01          | FR-003, FR-004, FR-007, FR-008, FR-009, US-01 | done     |
-| S-03 | plant-management          | edit a plant's watering info and delete a plant from their list                                                               | S-02          | FR-005, FR-006                              | proposed |
+| S-03 | plant-management          | edit a plant's watering info and delete a plant from their list                                                               | S-02          | FR-005, FR-006                              | done |
 
 ## Baseline
 
@@ -95,7 +95,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Edit and delete share UI surface (same plant detail/edit page); treating them as one slice avoids splitting a single-screen interaction across two changes.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -123,3 +123,4 @@ No open questions — all resolved.
 - **F-01: (foundation) EF Core + Identity wired; DB migration runs; auth middleware active** — Archived 2026-08-31 → `context/archive/2026-08-10-persistence-auth-scaffold/`. Lesson: —.
 - **S-01: user can sign up with email and password, sign in, sign out, and reach their empty plant list page** — Archived 2026-08-31 → `context/archive/2026-08-11-account-flow/`. Lesson: —.
 - **S-02: user can add a plant by entering its species name, see an AI-suggested watering schedule (frequency + amount), edit it if needed, save it, see the plant appear in their list with a "next watering in N days" status, mark it as watered, and see the countdown reset immediately; if AI is unavailable or the species is not recognised, the user sees an error state and can enter the schedule manually** — Archived 2026-09-04 → `context/archive/2026-08-11-core-loop/`. Lesson: —.
+- **S-03: user can edit a plant's watering schedule (frequency and amount) after initial setup, and delete a plant from their list** — Archived 2026-09-04 → `context/archive/2026-09-04-plant-management/`. Lesson: —.
