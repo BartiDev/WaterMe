@@ -187,27 +187,27 @@ No test project yet (per `AGENTS.md`). When added, cover:
 
 #### Automated
 
-- [x] 1.1 `dotnet build` succeeds with the new Edit page
+- [x] 1.1 `dotnet build` succeeds with the new Edit page — 66efa83
 
 #### Manual
 
-- [x] 1.2 Navigate to `/plants/edit/{id}` — form shows current values pre-populated
-- [x] 1.3 Change species name, click "Get schedule" — fields overwritten with AI suggestion
-- [x] 1.4 Edit any field, click Save — redirected to `/plants`; list shows updated values
-- [x] 1.5 Invalid submission — server-side validation error shown; no save
-- [x] 1.6 Edit another user's plant — 404 response
-- [x] 1.7 Delete from edit page — plant removed, redirected to `/plants`
+- [x] 1.2 Navigate to `/plants/edit/{id}` — form shows current values pre-populated — 66efa83
+- [x] 1.3 Change species name, click "Get schedule" — fields overwritten with AI suggestion — 66efa83
+- [x] 1.4 Edit any field, click Save — redirected to `/plants`; list shows updated values — 66efa83
+- [x] 1.5 Invalid submission — server-side validation error shown; no save — 66efa83
+- [x] 1.6 Edit another user's plant — 404 response — 66efa83
+- [x] 1.7 Delete from edit page — plant removed, redirected to `/plants` — 66efa83
 
 ### Phase 2: Index Page Updates
 
 #### Automated
 
-- [ ] 2.1 `dotnet build` succeeds with updated Index page
+- [x] 2.1 `dotnet build` succeeds with updated Index page
 
 #### Manual
 
-- [ ] 2.2 Edit link and Delete button visible on every row
-- [ ] 2.3 Edit link navigates to `/plants/edit/{id}`
-- [ ] 2.4 Delete first click → "Confirm delete"; 3-second timeout resets button
-- [ ] 2.5 Delete second click → row removed from DOM without page refresh
-- [ ] 2.6 Cross-user Delete POST → 404
+- [x] 2.2 Edit link and Delete button visible on every row
+- [x] 2.3 Edit link navigates to `/plants/edit/{id}`
+- [x] 2.4 Delete first click → "Confirm delete"; 3-second timeout resets button
+- [x] 2.5 Delete second click → row removed from DOM without page refresh
+- [x] 2.6 Cross-user Delete POST → 404

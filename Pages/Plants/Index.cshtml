@@ -37,6 +37,9 @@ else
                     <span class="badge @badgeClass status-badge" id="status-@plant.Id">@status</span>
                     <button class="btn btn-sm btn-outline-primary btn-water"
                             data-plant-id="@plant.Id">Water it</button>
+                    <a href="/plants/edit/@plant.Id" class="btn btn-outline-secondary btn-sm">Edit</a>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-delete"
+                            data-plant-id="@plant.Id">Delete</button>
                 </div>
             </li>
         }
@@ -80,6 +83,46 @@ else
             } catch (err) {
                 console.error('Water error', err);
                 waterBtn.disabled = false;
+            }
+
+        } else if (e.target.closest('.btn-delete')) {
+            const deleteBtn = e.target.closest('.btn-delete');
+            const id = deleteBtn.dataset.plantId;
+            if (!deleteBtn.hasAttribute('data-confirming')) {
+                deleteBtn.setAttribute('data-confirming', '');
+                deleteBtn.textContent = 'Confirm delete';
+                const timeoutId = setTimeout(() => {
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.removeAttribute('data-confirming');
+                    deleteBtn.removeAttribute('data-timeout-id');
+                }, 3000);
+                deleteBtn.dataset.timeoutId = timeoutId;
+            } else {
+                clearTimeout(Number(deleteBtn.dataset.timeoutId));
+                try {
+                    const res = await fetch('?handler=Delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token()
+                        },
+                        body: `id=${id}`
+                    });
+                    if (res.ok) {
+                        const row = deleteBtn.closest('li');
+                        if (row) row.remove();
+                    } else {
+                        console.error('Delete failed', res.status);
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.removeAttribute('data-confirming');
+                        deleteBtn.removeAttribute('data-timeout-id');
+                    }
+                } catch (err) {
+                    console.error('Delete error', err);
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.removeAttribute('data-confirming');
+                    deleteBtn.removeAttribute('data-timeout-id');
+                }
             }
 
         } else if (unwaterBtn) {

@@ -67,4 +67,17 @@ public class IndexModel : PageModel
 
         return new JsonResult(new { status = GetStatus(plant) });
     }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("Authenticated user has no ID claim.");
+        var plant = await _db.Plants
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        if (plant == null) return NotFound();
+
+        _db.Plants.Remove(plant);
+        await _db.SaveChangesAsync();
+
+        return RedirectToPage("/Plants/Index");
+    }
 }
