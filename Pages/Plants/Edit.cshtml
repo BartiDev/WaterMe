@@ -1,0 +1,103 @@
+@page "{id:int}"
+@model water_me.Pages.Plants.EditModel
+@{
+    ViewData["Title"] = "Edit Plant";
+}
+
+<h2>Edit Plant</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" asp-route-id="@Model.PlantId">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.SpeciesName" class="form-label">Species name</label>
+                <input asp-for="Input.SpeciesName" class="form-control" placeholder="e.g. Monstera deliciosa" />
+                <span asp-validation-for="Input.SpeciesName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Nickname" class="form-label">Nickname <span class="text-muted">(optional)</span></label>
+                <input asp-for="Input.Nickname" class="form-control" placeholder="e.g. My big leaf friend" />
+                <span asp-validation-for="Input.Nickname" class="text-danger"></span>
+            </div>
+
+            <button type="button" id="btn-suggest" class="btn btn-secondary mb-3">Get schedule</button>
+
+            <div id="ai-error" class="alert alert-warning mb-3" style="display:none">
+                Could not get an AI suggestion. Enter the watering schedule manually.
+            </div>
+
+            <div id="schedule-section">
+                <div class="mb-3">
+                    <label asp-for="Input.WateringFrequencyDays" class="form-label">Watering frequency (days)</label>
+                    <input asp-for="Input.WateringFrequencyDays" id="frequency" class="form-control" type="number" min="1" max="365" />
+                    <span asp-validation-for="Input.WateringFrequencyDays" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.WateringAmount" class="form-label">Amount</label>
+                    <input asp-for="Input.WateringAmount" id="amount" class="form-control" placeholder="e.g. 200ml" />
+                    <span asp-validation-for="Input.WateringAmount" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+
+        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.PlantId" class="mt-4">
+            <button type="submit" class="btn btn-danger btn-sm">Delete plant</button>
+        </form>
+
+        <a href="/plants" class="d-block mt-3 text-muted">Back to my plants</a>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('span[data-valmsg-for]').forEach(function (span) {
+        var input = document.querySelector('[name="' + span.getAttribute('data-valmsg-for') + '"]');
+        if (input) {
+            input.addEventListener('input', function () {
+                span.textContent = '';
+                span.className = 'text-danger field-validation-valid';
+            });
+        }
+    });
+
+    document.getElementById('btn-suggest').addEventListener('click', async function () {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const speciesName = document.querySelector('input[name="Input.SpeciesName"]').value;
+
+        const formData = new FormData();
+        formData.append('Input.SpeciesName', speciesName);
+
+        try {
+            const response = await fetch('?handler=Suggest', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('frequency').value = data.frequencyDays;
+                document.getElementById('amount').value = data.amount;
+                document.getElementById('frequency').dispatchEvent(new Event('input'));
+                document.getElementById('amount').dispatchEvent(new Event('input'));
+                document.getElementById('ai-error').style.display = 'none';
+            } else {
+                document.getElementById('ai-error').style.display = 'block';
+                document.getElementById('frequency').value = '';
+                document.getElementById('amount').value = '';
+            }
+        } catch {
+            document.getElementById('ai-error').style.display = 'block';
+            document.getElementById('frequency').value = '';
+            document.getElementById('amount').value = '';
+        }
+    });
+</script>
+}
