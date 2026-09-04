@@ -202,12 +202,12 @@ No test project yet (per `AGENTS.md`). When added, cover:
 
 #### Automated
 
-- [x] 2.1 `dotnet build` succeeds with updated Index page
+- [x] 2.1 `dotnet build` succeeds with updated Index page — 7fce3e4
 
 #### Manual
 
-- [x] 2.2 Edit link and Delete button visible on every row
-- [x] 2.3 Edit link navigates to `/plants/edit/{id}`
-- [x] 2.4 Delete first click → "Confirm delete"; 3-second timeout resets button
-- [x] 2.5 Delete second click → row removed from DOM without page refresh
-- [x] 2.6 Cross-user Delete POST → 404
+- [x] 2.2 Edit link and Delete button visible on every row — 7fce3e4
+- [x] 2.3 Edit link navigates to `/plants/edit/{id}` — 7fce3e4
+- [x] 2.4 Delete first click → "Confirm delete"; 3-second timeout resets button — 7fce3e4
+- [x] 2.5 Delete second click → row removed from DOM without page refresh — 7fce3e4
+- [x] 2.6 Cross-user Delete POST → 404 — 7fce3e4
