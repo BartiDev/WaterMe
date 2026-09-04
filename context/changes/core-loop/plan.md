@@ -22,7 +22,7 @@ Deliver S-02: the full 6-step MVP flow on top of the completed S-01 account foun
 - Each plant in the list shows one of: "Water today" (null LastWateredAt), "Next watering in N days" (within schedule), or a red "Overdue by N days" badge.
 - "Water it" button: AJAX POST records the watering immediately; button switches to "Undo" with a 10-second countdown. Clicking Undo within that window reverts the watering server-side. After 10 seconds, Undo disappears.
 - If OpenAI is unavailable or returns unparseable output, the Add Plant page shows an inline error and exposes empty, editable frequency/amount fields for manual entry.
-- Full S-02 flow works end-to-end on production (Azure App Service + Azure SQL).
+- Production deployment is out of scope for this change — handled in the next roadmap slice.
 
 ### Key Discoveries
 
@@ -44,7 +44,7 @@ Deliver S-02: the full 6-step MVP flow on top of the completed S-01 account foun
 
 ## Implementation Approach
 
-Five phases in dependency order. Phases 1 and 2 build the foundations (data model + AI service) that Phase 3 (add-plant page) and Phase 4 (list + mark-as-watered) depend on. Phase 5 is the production deployment gate — the change is not done until the full flow works on Azure. Each phase leaves the app in a buildable, runnable state.
+Four phases in dependency order. Phases 1 and 2 build the foundations (data model + AI service) that Phase 3 (add-plant page) and Phase 4 (list + mark-as-watered) depend on. Each phase leaves the app in a buildable, runnable state. Production deployment is deferred to the next roadmap slice.
 
 ## Critical Implementation Details
 
@@ -321,63 +321,6 @@ A single `<form>` with an anti-forgery hidden input is needed anywhere on the pa
 - Navigate to `/plants` in a private/incognito window (different user) — no plants visible (isolation confirmed)
 - `GET /healthz` returns 200 (no regression)
 
-**Pause here for manual confirmation before proceeding to Phase 5.**
-
----
-
-## Phase 5: Production Deployment
-
-### Overview
-
-Apply the EF Core migration to the Azure SQL production database, configure the OpenAI API key and model ID as Azure App Service Application Settings, deploy the app, and smoke-test the full S-02 flow on production. Phase 5 is complete when the 6-step MVP flow works end-to-end in production.
-
-### Changes Required
-
-#### 1. Azure App Service application settings
-
-**Azure portal / CLI**
-
-**Intent**: Supply the two OpenAI secrets to the production app without checking them into source control.
-
-**Contract**: In Azure App Service → Configuration → Application Settings, add:
-- `OpenRouter__ApiKey` = `<OpenRouter API key>` (double-underscore maps to nested config)
-- `OpenRouter__ModelId` = `openai/gpt-4o-mini` (or override the appsettings.json default if needed)
-
-#### 2. EF Core migration on Azure SQL
-
-**Intent**: Bring the production Azure SQL schema up to date with the `AddPlant` migration before deploying the new app code.
-
-**Contract**: Run the migration against the production connection string:
-```
-dotnet ef database update --connection "<azure-sql-connection-string>"
-```
-Verify via Azure portal or SQL client that the `Plants` table and `IX_Plants_UserId` index exist.
-
-#### 3. Deploy app code
-
-**Intent**: Push the current `main` branch; GitHub Actions CI picks it up and deploys to Azure App Service.
-
-**Contract**: `git push` to `main`. Confirm the GitHub Actions workflow completes successfully. Monitor App Service logs for startup errors.
-
-### Success Criteria
-
-#### Automated Verification
-
-- GitHub Actions CI workflow passes (build + deploy steps succeed)
-
-#### Manual Verification
-
-- Full S-02 flow on production URL:
-  1. Register a new account → lands on `/plants`
-  2. Click "Add plant" → `/plants/add` renders correctly
-  3. Enter a species name → AI suggestion appears within 5 seconds
-  4. Edit if desired, click "Add plant" → plant appears in list with "Water today" status
-  5. Click "Water it" → countdown appears, status updates to "Next watering in N days"
-  6. Wait 10 seconds → countdown expires; "Water it" is re-enabled
-- `GET /healthz` returns 200 on production (no regression)
-- Verify in Azure SQL that the `Plants` row is associated to the correct user ID (data isolation check)
-
----
 
 ## Testing Strategy
 
@@ -461,14 +404,3 @@ No test project exists yet. When added (per `AGENTS.md`), cover:
 - [x] 4.7 Cross-user isolation: different account sees no plants — bb9bf7c
 - [x] 4.8 `GET /healthz` returns 200 — bb9bf7c
 
-### Phase 5: Production Deployment
-
-#### Automated
-
-- [ ] 5.1 GitHub Actions CI workflow passes
-
-#### Manual
-
-- [ ] 5.2 Full 6-step S-02 flow works on production URL
-- [ ] 5.3 `GET /healthz` returns 200 on production
-- [ ] 5.4 Azure SQL `Plants` row is user-scoped (data isolation spot-check)
